@@ -118,7 +118,7 @@ export default function AccueilScreen({ navigation }: any) {
 const s = StyleSheet.create({
   container:   { flex: 1, backgroundColor: '#F7FBFF' },
   center:      { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  hero:        { background: '#1A3D6E', backgroundColor: '#1A3D6E', padding: 24, alignItems: 'center' },
+  hero:        { backgroundColor: '#1A3D6E', padding: 24, alignItems: 'center' },
   logo:        { width: 80, height: 80, marginBottom: 12 },
   heroTitle:   { fontSize: 24, fontWeight: '800', color: '#fff', textAlign: 'center', lineHeight: 32 },
   heroSub:     { fontSize: 13, color: 'rgba(255,255,255,.7)', marginTop: 6, textAlign: 'center' },
