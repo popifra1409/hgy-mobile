@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch(`${API}/patient/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telephone, password: code }),
+        body: JSON.stringify({ login: telephone, password: code }),
       })
       const data = await res.json()
       if (data.success && data.token) {

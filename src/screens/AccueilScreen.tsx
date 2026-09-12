@@ -41,7 +41,7 @@ export default function AccueilScreen({ navigation }: any) {
 
       {/* Hero */}
       <View style={s.hero}>
-        <Image source={require('../../assets/logo.png')} style={s.logo} resizeMode="contain" />
+        <View style={[s.logo, { alignItems:'center', justifyContent:'center' }]}><Text style={{ fontSize: 36 }}>🏥</Text></View>
         <Text style={s.heroTitle}>Hôpital Général{'\n'}de Yaoundé</Text>
         <Text style={s.heroSub}>{lang === 'fr' ? 'Hôpital de référence au Cameroun' : 'Reference Hospital in Cameroon'}</Text>
 
@@ -49,9 +49,10 @@ export default function AccueilScreen({ navigation }: any) {
         <View style={s.actions}>
           {[
             { icon: '📅', label: lang === 'fr' ? 'Rendez-vous' : 'Appointment', screen: 'RendezVous' },
-            { icon: '👨‍⚕️', label: lang === 'fr' ? 'Spécialistes' : 'Specialists', screen: 'Specialistes' },
+            { icon: '👨‍⚕️', label: lang === 'fr' ? 'Spécialistes' : 'Specialists', screen: 'SpecialistesTab' },
             { icon: '🚨', label: 'Urgences', screen: 'Urgences' },
-            { icon: '💬', label: 'NEEVA', screen: 'Chatbot' },
+            { icon: '💬', label: 'HGY AI', screen: 'Chatbot' },
+            { icon: '⚙️', label: lang==='fr'?'Paramètres':'Settings', screen: 'Settings' },
           ].map((a, i) => (
             <TouchableOpacity key={i} style={s.actionBtn}
               onPress={() => navigation.navigate(a.screen)}>
@@ -119,7 +120,8 @@ const s = StyleSheet.create({
   container:   { flex: 1, backgroundColor: '#F7FBFF' },
   center:      { flex: 1, justifyContent: 'center', alignItems: 'center' },
   hero:        { backgroundColor: '#1A3D6E', padding: 24, alignItems: 'center' },
-  logo:        { width: 80, height: 80, marginBottom: 12 },
+  logo:        { width: 80, height: 80, marginBottom: 12, borderRadius: 12 },
+  slogan:      { fontSize: 11, color: 'rgba(255,255,255,.55)', textAlign: 'center', letterSpacing: 1.5, marginBottom: 10, fontStyle: 'italic' },
   heroTitle:   { fontSize: 24, fontWeight: '800', color: '#fff', textAlign: 'center', lineHeight: 32 },
   heroSub:     { fontSize: 13, color: 'rgba(255,255,255,.7)', marginTop: 6, textAlign: 'center' },
   actions:     { flexDirection: 'row', marginTop: 24, gap: 12 },

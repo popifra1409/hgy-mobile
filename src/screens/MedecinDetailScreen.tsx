@@ -68,7 +68,7 @@ export default function MedecinDetailScreen({ route, navigation }: any) {
 
           {/* RDV */}
           <TouchableOpacity style={s.rdvBtn}
-            onPress={() => navigation.navigate('RendezVous', { medecinPreselect: medecin })}>
+            onPress={() => navigation.navigate('RendezVous', { medecinPreselect: medecin, specId: medecin.specialite_id, specName: medecin.specialite?.fr || medecin.specialite?.nom_fr })}>
             <Text style={s.rdvBtnTxt}>
               📅 {lang === 'fr' ? 'Prendre rendez-vous' : 'Book appointment'}
             </Text>
