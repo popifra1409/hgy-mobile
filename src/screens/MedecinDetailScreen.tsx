@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLang } from '../context/LangContext'
@@ -8,7 +8,17 @@ const JOURS = ['','Lun','Mar','Mer','Jeu','Ven','Sam','Dim']
 
 export default function MedecinDetailScreen({ route, navigation }: any) {
   const { lang } = useLang()
-  const { medecin, planning } = route.params || {}
+  const { medecin, planning: planningInit } = route.params || {}
+  const [planning, setPlanning] = React.useState<any[]>(planningInit || [])
+
+  React.useEffect(() => {
+    if (!medecin?.id) return
+    if (planning.length > 0) return // déjà chargé
+    fetch(`https://hopitalgeneraldeyaounde.cm/portail/public/api/v1/planning/medecin/${medecin.id}`)
+      .then(r => r.json())
+      .then(d => setPlanning(d?.data || []))
+      .catch(() => {})
+  }, [medecin?.id])
   if (!medecin) return null
 
   return (
@@ -68,7 +78,7 @@ export default function MedecinDetailScreen({ route, navigation }: any) {
 
           {/* RDV */}
           <TouchableOpacity style={s.rdvBtn}
-            onPress={() => navigation.navigate('RendezVous', { medecinPreselect: medecin, specId: medecin.specialite_id, specName: medecin.specialite?.fr || medecin.specialite?.nom_fr })}>
+            onPress={() => navigation.navigate('RendezVousFromSpec', { medecinPreselect: medecin, specId: medecin.specialite_id, specName: medecin.specialite?.fr || medecin.specialite?.nom_fr })}>
             <Text style={s.rdvBtnTxt}>
               📅 {lang === 'fr' ? 'Prendre rendez-vous' : 'Book appointment'}
             </Text>

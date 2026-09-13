@@ -6,7 +6,7 @@ import {
 import { medecinsService, rdvService } from '../services/api'
 import { useLang } from '../context/LangContext'
 
-export default function SpecialistesScreen() {
+export default function SpecialistesScreen({ navigation }: any) {
   const { lang } = useLang()
   const [medecins, setMedecins]   = useState<any[]>([])
   const [filtered, setFiltered]   = useState<any[]>([])
@@ -15,7 +15,7 @@ export default function SpecialistesScreen() {
   const [selected, setSelected]   = useState<any>(null)
 
   useEffect(() => {
-    medecinsService.getAll()
+    medecinsService.getAll({ avec_planning: 1, per_page: 200 })
       .then(r => { setMedecins(r.data?.data || []); setFiltered(r.data?.data || []) })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -30,7 +30,7 @@ export default function SpecialistesScreen() {
   }, [search, medecins])
 
   const MedecinCard = ({ m }: { m: any }) => (
-    <TouchableOpacity style={s.card} onPress={() => setSelected(m)}>
+    <TouchableOpacity style={s.card} onPress={() => navigation.navigate('MedecinDetail', { medecin: m, planning: [] })}>
       <View style={s.cardLeft}>
         {m.photo
           ? <Image source={{ uri: m.photo }} style={s.avatar} />
@@ -133,7 +133,15 @@ export default function SpecialistesScreen() {
               )}
 
               {/* Bouton RDV */}
-              <TouchableOpacity style={[s.rdvBtn, { backgroundColor: selected.couleur || '#1A3D6E' }]}>
+              <TouchableOpacity style={[s.rdvBtn, { backgroundColor: selected.couleur || '#1A3D6E' }]}
+                onPress={() => {
+                  setSelected(null)
+                  navigation.navigate('RendezVousFromSpec', {
+                    medecinPreselect: selected,
+                    specId: selected.specialite_id,
+                    specName: selected.specialite?.[lang] || selected.specialite?.nom_fr
+                  })
+                }}>
                 <Text style={s.rdvText}>📅 {lang === 'fr' ? 'Prendre rendez-vous' : 'Book appointment'}</Text>
               </TouchableOpacity>
             </View>
