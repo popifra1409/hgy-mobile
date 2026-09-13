@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "29965936782",
+    "project_id": "hgy-notify",
+    "storage_bucket": "hgy-notify.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:29965936782:android:d5c0247d0deb41555181df",
+        "android_client_info": {
+          "package_name": "com.hgy.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5NQLmJ-p4V4EG7cVhN7OwJBreP7LhtzM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
