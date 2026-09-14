@@ -5,6 +5,7 @@ import * as Notifications from 'expo-notifications'
 import AppNavigator from './src/navigation/AppNavigator'
 import { LangProvider } from './src/context/LangContext'
 import { AuthProvider } from './src/context/AuthContext'
+import { MedecinAuthProvider } from './src/context/MedecinAuthContext'
 import { registerForPushNotifications } from './src/services/notifications'
 
 export default function App() {
@@ -13,7 +14,7 @@ export default function App() {
 
   useEffect(() => {
     // Demande permission au démarrage
-    registerForPushNotifications()
+    registerForPushNotifications(undefined)
 
     // Écoute notifications reçues
     notifListener.current = Notifications.addNotificationReceivedListener(n => {
@@ -26,20 +27,20 @@ export default function App() {
     })
 
     return () => {
-      if (notifListener.current)
-        Notifications.removeNotificationSubscription(notifListener.current)
-      if (responseListener.current)
-        Notifications.removeNotificationSubscription(responseListener.current)
+      if (notifListener.current?.remove) notifListener.current.remove()
+      if (responseListener.current?.remove) responseListener.current.remove()
     }
   }, [])
 
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <LangProvider>
+        <MedecinAuthProvider>
+          <LangProvider>
           <StatusBar style="light" />
           <AppNavigator />
-        </LangProvider>
+          </LangProvider>
+        </MedecinAuthProvider>
       </AuthProvider>
     </SafeAreaProvider>
   )

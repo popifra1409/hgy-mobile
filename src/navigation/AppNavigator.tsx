@@ -19,7 +19,9 @@ import ArticleScreen       from '../screens/ArticleScreen'
 import EmissionScreen      from '../screens/EmissionScreen'
 import UrgencesScreen      from '../screens/UrgencesScreen'
 import BlogScreen          from '../screens/BlogScreen'
-import SettingsScreen      from '../screens/SettingsScreen'
+import SettingsScreen        from '../screens/SettingsScreen'
+import ChangePasswordScreen  from '../screens/ChangePasswordScreen'
+import MedecinEspaceScreen   from '../screens/MedecinEspaceScreen'
 
 const Tab   = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -52,6 +54,16 @@ function AccueilStackScreen() {
 
 // Stack interne pour Mon Espace
 const EspaceStack = createNativeStackNavigator()
+function MedecinStack() {
+  const MedStack = createNativeStackNavigator()
+  return (
+    <MedStack.Navigator screenOptions={{ headerShown: false }}>
+      <MedStack.Screen name="MedecinHome"     component={MedecinEspaceScreen} />
+      <MedStack.Screen name="ChangePassword"  component={ChangePasswordScreen} />
+    </MedStack.Navigator>
+  )
+}
+
 function EspaceStackScreen() {
   return (
     <EspaceStack.Navigator screenOptions={{ headerShown: false }}>
@@ -60,7 +72,8 @@ function EspaceStackScreen() {
       <EspaceStack.Screen name="RdvDetail"     component={RdvDetailScreen} />
       <EspaceStack.Screen name="Resultat"      component={ResultatScreen} />
       <EspaceStack.Screen name="Notifications" component={NotificationsScreen} />
-      <EspaceStack.Screen name="Settings"      component={SettingsScreen} />
+      <EspaceStack.Screen name="Settings"        component={SettingsScreen} />
+      <EspaceStack.Screen name="ChangePassword" component={ChangePasswordScreen} />
     </EspaceStack.Navigator>
   )
 }
@@ -103,6 +116,8 @@ function MainTabs() {
         options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="👨‍⚕️" label="Médecins" focused={focused} /> }} />
       <Tab.Screen name="MonEspaceTab" component={EspaceStackScreen}
         options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="Mon Espace" focused={focused} /> }} />
+      <Tab.Screen name="MedecinTab" component={MedecinStack}
+        options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="🩺" label="Médecin" focused={focused} /> }} />
       <Tab.Screen name="Chatbot" component={ChatbotScreen}
         options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="💬" label="HGY" focused={focused} /> }} />
     </Tab.Navigator>

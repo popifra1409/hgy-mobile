@@ -250,6 +250,12 @@ export default function MonEspaceScreen({ navigation }: any) {
                   </View>
                 </View>
               ))}
+              <TouchableOpacity style={{ backgroundColor: COLORS.primary, borderRadius: 12, paddingVertical: 12, alignItems: 'center', marginTop: 14, marginBottom: 8 }}
+                onPress={() => navigation.navigate('ChangePassword')}>
+                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '700' }}>
+                  🔑 {lang === 'fr' ? 'Changer mon mot de passe' : 'Change my password'}
+                </Text>
+              </TouchableOpacity>
               <Text style={s.profilHint}>
                 {lang === 'fr'
                   ? 'Pour modifier vos informations, contactez l\'accueil au +237 6 57 60 30 39.'
