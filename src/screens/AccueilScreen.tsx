@@ -298,6 +298,7 @@ const s = StyleSheet.create({
   heroTitle:       { fontSize: 22, fontWeight: '800', color: '#fff', textAlign: 'center', lineHeight: 30, marginBottom: 4 },
   heroSub:         { fontSize: 13, color: 'rgba(255,255,255,.7)', textAlign: 'center', marginBottom: 4 },
   slogan:          { fontSize: 11, color: 'rgba(255,255,255,.5)', fontStyle: 'italic', letterSpacing: 1.5, marginBottom: 14 },
+  bellBtn:         { position:'absolute', top:12, right:16, width:36, height:36, borderRadius:18, backgroundColor:'rgba(255,255,255,.15)', alignItems:'center', justifyContent:'center' },
   contactBar:      { flexDirection: 'row', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 12 },
   contactChip:     { backgroundColor: 'rgba(255,255,255,.15)', borderRadius: 99, paddingHorizontal: 14, paddingVertical: 7 },
   contactChipTxt:  { fontSize: 12, color: '#fff', fontWeight: '700' },

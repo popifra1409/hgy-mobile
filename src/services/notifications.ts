@@ -8,14 +8,16 @@ const API = 'https://hopitalgeneraldeyaounde.cm/portail/public/api/v1'
 // Configure le comportement des notifications
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge:  true,
+    shouldShowAlert:  true,
+    shouldShowBanner: true,
+    shouldShowList:   true,
+    shouldPlaySound:  true,
+    shouldSetBadge:   true,
   }),
 })
 
 // Demande la permission et récupère le token Expo Push
-export async function registerForPushNotifications(patientId?: number): Promise<string | null> {
+export async function registerForPushNotifications(patientId?: number | null): Promise<string | null> {
   if (!Device.isDevice) {
     console.warn('Notifications push uniquement sur appareil physique')
     return null
@@ -106,7 +108,7 @@ export async function scheduleRdvReminder(rdv: {
       sound:    'default',
       badge:    1,
     },
-    trigger: { date: reminderDate },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: reminderDate },
   })
 }
 

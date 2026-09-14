@@ -11,7 +11,7 @@ export function useNotifications(navigation?: any) {
 
   useEffect(() => {
     // Enregistre pour les notifications push
-    registerForPushNotifications(patient?.id ?? undefined)
+    registerForPushNotifications(patient?.id ?? null)
       .then(token => {
         if (token) setPushToken(token)
       })

@@ -5,23 +5,31 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { View, Text } from 'react-native'
 import { COLORS } from '../constants/theme'
 
-import AccueilScreen       from '../screens/AccueilScreen'
-import RendezVousScreen    from '../screens/RendezVousScreen'
-import SpecialistesScreen  from '../screens/SpecialistesScreen'
-import ChatbotScreen       from '../screens/ChatbotScreen'
-import MonEspaceScreen     from '../screens/MonEspaceScreen'
-import LoginScreen         from '../screens/LoginScreen'
-import RdvDetailScreen     from '../screens/RdvDetailScreen'
-import ResultatScreen      from '../screens/ResultatScreen'
-import MedecinDetailScreen from '../screens/MedecinDetailScreen'
-import NotificationsScreen from '../screens/NotificationsScreen'
-import ArticleScreen       from '../screens/ArticleScreen'
-import EmissionScreen      from '../screens/EmissionScreen'
-import UrgencesScreen      from '../screens/UrgencesScreen'
-import BlogScreen          from '../screens/BlogScreen'
-import SettingsScreen        from '../screens/SettingsScreen'
-import ChangePasswordScreen  from '../screens/ChangePasswordScreen'
-import MedecinEspaceScreen   from '../screens/MedecinEspaceScreen'
+// Screens principaux
+import AccueilScreen        from '../screens/AccueilScreen'
+import RendezVousScreen     from '../screens/RendezVousScreen'
+import SpecialistesScreen   from '../screens/SpecialistesScreen'
+import MonEspaceScreen      from '../screens/MonEspaceScreen'
+import PlusScreen           from '../screens/PlusScreen'
+
+// Screens secondaires
+import LoginScreen          from '../screens/LoginScreen'
+import RdvDetailScreen      from '../screens/RdvDetailScreen'
+import ResultatScreen       from '../screens/ResultatScreen'
+import MedecinDetailScreen  from '../screens/MedecinDetailScreen'
+import NotificationsScreen  from '../screens/NotificationsScreen'
+import ArticleScreen        from '../screens/ArticleScreen'
+import EmissionScreen       from '../screens/EmissionScreen'
+import UrgencesScreen       from '../screens/UrgencesScreen'
+import SettingsScreen       from '../screens/SettingsScreen'
+import BlogScreen           from '../screens/BlogScreen'
+import ChangePasswordScreen from '../screens/ChangePasswordScreen'
+import HeuresVisiteScreen   from '../screens/HeuresVisiteScreen'
+import ChatbotScreen        from '../screens/ChatbotScreen'
+
+// Screens professionnels
+import MedecinEspaceScreen  from '../screens/MedecinEspaceScreen'
+import StaffEspaceScreen    from '../screens/StaffEspaceScreen'
 
 const Tab   = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -37,56 +45,68 @@ function TabIcon({ emoji, label, focused }: { emoji:string; label:string; focuse
   )
 }
 
-// Stack interne pour Accueil (permet navigation vers Article/Emission/Urgences)
+// ── Stacks ──
 const AccueilStack = createNativeStackNavigator()
 function AccueilStackScreen() {
   return (
-    <AccueilStack.Navigator screenOptions={{ headerShown: false }}>
-      <AccueilStack.Screen name="AccueilHome"  component={AccueilScreen} />
-      <AccueilStack.Screen name="Article"      component={ArticleScreen} getId={({ params }) => (params as any)?.slug} />
-      <AccueilStack.Screen name="Emission"     component={EmissionScreen} getId={({ params }) => String((params as any)?.id)} />
-      <AccueilStack.Screen name="Urgences"     component={UrgencesScreen} />
-      <AccueilStack.Screen name="Blog"         component={BlogScreen} />
-      <AccueilStack.Screen name="Settings"     component={SettingsScreen} />
+    <AccueilStack.Navigator screenOptions={{ headerShown:false }}>
+      <AccueilStack.Screen name="AccueilHome"   component={AccueilScreen} />
+      <AccueilStack.Screen name="Article"       component={ArticleScreen} getId={({ params }) => (params as any)?.slug} />
+      <AccueilStack.Screen name="Emission"      component={EmissionScreen} getId={({ params }) => String((params as any)?.id)} />
+      <AccueilStack.Screen name="Urgences"      component={UrgencesScreen} />
+      <AccueilStack.Screen name="Blog"          component={BlogScreen} />
+      <AccueilStack.Screen name="HeuresVisite"  component={HeuresVisiteScreen} />
+      <AccueilStack.Screen name="Settings"      component={SettingsScreen} />
+      <AccueilStack.Screen name="Notifications" component={NotificationsScreen} />
+      <AccueilStack.Screen name="Chatbot"       component={ChatbotScreen} />
     </AccueilStack.Navigator>
   )
 }
 
-// Stack interne pour Mon Espace
-const EspaceStack = createNativeStackNavigator()
-function MedecinStack() {
-  const MedStack = createNativeStackNavigator()
+const SpecStack = createNativeStackNavigator()
+function SpecStackScreen() {
   return (
-    <MedStack.Navigator screenOptions={{ headerShown: false }}>
-      <MedStack.Screen name="MedecinHome"     component={MedecinEspaceScreen} />
-      <MedStack.Screen name="ChangePassword"  component={ChangePasswordScreen} />
-    </MedStack.Navigator>
+    <SpecStack.Navigator screenOptions={{ headerShown:false }}>
+      <SpecStack.Screen name="SpecHome"           component={SpecialistesScreen} />
+      <SpecStack.Screen name="MedecinDetail"      component={MedecinDetailScreen} />
+      <SpecStack.Screen name="RendezVousFromSpec" component={RendezVousScreen} />
+    </SpecStack.Navigator>
   )
 }
 
+const EspaceStack = createNativeStackNavigator()
 function EspaceStackScreen() {
   return (
-    <EspaceStack.Navigator screenOptions={{ headerShown: false }}>
-      <EspaceStack.Screen name="EspaceHome"    component={MonEspaceScreen} />
-      <EspaceStack.Screen name="Login"         component={LoginScreen} />
-      <EspaceStack.Screen name="RdvDetail"     component={RdvDetailScreen} />
-      <EspaceStack.Screen name="Resultat"      component={ResultatScreen} />
-      <EspaceStack.Screen name="Notifications" component={NotificationsScreen} />
-      <EspaceStack.Screen name="Settings"        component={SettingsScreen} />
+    <EspaceStack.Navigator screenOptions={{ headerShown:false }}>
+      <EspaceStack.Screen name="EspaceHome"     component={MonEspaceScreen} />
+      <EspaceStack.Screen name="Login"          component={LoginScreen} />
+      <EspaceStack.Screen name="RdvDetail"      component={RdvDetailScreen} />
+      <EspaceStack.Screen name="Resultat"       component={ResultatScreen} />
+      <EspaceStack.Screen name="Notifications"  component={NotificationsScreen} />
+      <EspaceStack.Screen name="Settings"       component={SettingsScreen} />
       <EspaceStack.Screen name="ChangePassword" component={ChangePasswordScreen} />
     </EspaceStack.Navigator>
   )
 }
 
-// Stack interne pour Spécialistes
-const SpecStack = createNativeStackNavigator()
-function SpecStackScreen() {
+const PlusStack = createNativeStackNavigator()
+function PlusStackScreen() {
   return (
-    <SpecStack.Navigator screenOptions={{ headerShown: false }}>
-      <SpecStack.Screen name="SpecHome"       component={SpecialistesScreen} />
-      <SpecStack.Screen name="MedecinDetail"  component={MedecinDetailScreen} />
-      <SpecStack.Screen name="RendezVousFromSpec" component={RendezVousScreen} />
-    </SpecStack.Navigator>
+    <PlusStack.Navigator screenOptions={{ headerShown:false }}>
+      <PlusStack.Screen name="PlusHome"       component={PlusScreen} />
+      <PlusStack.Screen name="Chatbot"        component={ChatbotScreen} />
+      <PlusStack.Screen name="Notifications"  component={NotificationsScreen} />
+      <PlusStack.Screen name="HeuresVisite"   component={HeuresVisiteScreen} />
+      <PlusStack.Screen name="Urgences"       component={UrgencesScreen} />
+      <PlusStack.Screen name="Blog"           component={BlogScreen} />
+      <PlusStack.Screen name="Article"        component={ArticleScreen} />
+      <PlusStack.Screen name="Emission"       component={EmissionScreen} />
+      <PlusStack.Screen name="Settings"       component={SettingsScreen} />
+      <PlusStack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+      {/* Accès professionnels discrets */}
+      <PlusStack.Screen name="MedecinTab"     component={MedecinEspaceScreen} />
+      <PlusStack.Screen name="StaffTab"       component={StaffEspaceScreen} />
+    </PlusStack.Navigator>
   )
 }
 
@@ -101,11 +121,12 @@ function MainTabs() {
           paddingBottom: 4,
           paddingTop: 4,
           backgroundColor: COLORS.white,
-          borderTopWidth:1, borderTopColor: COLORS.gray200,
-          elevation:12, shadowColor:'#000',
-          shadowOpacity:0.1, shadowRadius:16,
-          position: 'absolute',
-          bottom: 0,
+          borderTopWidth: 1,
+          borderTopColor: COLORS.gray200,
+          elevation: 12,
+          shadowColor: '#000',
+          shadowOpacity: 0.1,
+          shadowRadius: 16,
         },
       }}>
       <Tab.Screen name="AccueilTab" component={AccueilStackScreen}
@@ -116,10 +137,8 @@ function MainTabs() {
         options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="👨‍⚕️" label="Médecins" focused={focused} /> }} />
       <Tab.Screen name="MonEspaceTab" component={EspaceStackScreen}
         options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="👤" label="Mon Espace" focused={focused} /> }} />
-      <Tab.Screen name="MedecinTab" component={MedecinStack}
-        options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="🩺" label="Médecin" focused={focused} /> }} />
-      <Tab.Screen name="Chatbot" component={ChatbotScreen}
-        options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="💬" label="HGY" focused={focused} /> }} />
+      <Tab.Screen name="PlusTab" component={PlusStackScreen}
+        options={{ tabBarIcon: ({ focused }) => <TabIcon emoji="☰" label="Plus" focused={focused} /> }} />
     </Tab.Navigator>
   )
 }
@@ -127,7 +146,7 @@ function MainTabs() {
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown:false }}>
         <Stack.Screen name="Main" component={MainTabs} />
       </Stack.Navigator>
     </NavigationContainer>

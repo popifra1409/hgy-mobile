@@ -6,6 +6,7 @@ import AppNavigator from './src/navigation/AppNavigator'
 import { LangProvider } from './src/context/LangContext'
 import { AuthProvider } from './src/context/AuthContext'
 import { MedecinAuthProvider } from './src/context/MedecinAuthContext'
+import { StaffAuthProvider }   from './src/context/StaffAuthContext'
 import { registerForPushNotifications } from './src/services/notifications'
 
 export default function App() {
@@ -14,7 +15,7 @@ export default function App() {
 
   useEffect(() => {
     // Demande permission au démarrage
-    registerForPushNotifications(undefined)
+    registerForPushNotifications()
 
     // Écoute notifications reçues
     notifListener.current = Notifications.addNotificationReceivedListener(n => {
@@ -36,10 +37,12 @@ export default function App() {
     <SafeAreaProvider>
       <AuthProvider>
         <MedecinAuthProvider>
-          <LangProvider>
+          <StaffAuthProvider>
+            <LangProvider>
           <StatusBar style="light" />
           <AppNavigator />
-          </LangProvider>
+            </LangProvider>
+          </StaffAuthProvider>
         </MedecinAuthProvider>
       </AuthProvider>
     </SafeAreaProvider>

@@ -1,10 +1,14 @@
 import axios from 'axios'
 import * as SecureStore from 'expo-secure-store'
 
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://hopitalgeneraldeyaounde.cm/portail/public/api/v1'
-const WP_URL   = process.env.EXPO_PUBLIC_WP_URL   || 'https://hopitalgeneraldeyaounde.cm/wpblog/wp-json/hgy/v1'
+const BASE_URL = 'https://hopitalgeneraldeyaounde.cm/portail/public/api/v1'
+const WP_URL   = 'https://hopitalgeneraldeyaounde.cm/wpblog/wp-json/hgy/v1'
 
-const api = axios.create({ baseURL: BASE_URL, timeout: 15000 })
+const api = axios.create({
+  baseURL: BASE_URL,
+  timeout: 30000,
+  headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+})
 
 // Intercepteur token
 api.interceptors.request.use(async (config) => {
