@@ -39,12 +39,15 @@ export function MedecinAuthProvider({ children }: { children: React.ReactNode })
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('Medecin login attempt:', email)
       const r = await fetch(`${API}/medecin/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
-      const d = await r.json()
+      const text = await r.text()
+      console.log('Medecin login response:', r.status, text.slice(0, 200))
+      const d = JSON.parse(text)
       if (d.success && d.token) {
         await SecureStore.setItemAsync('hgy_medecin_token', d.token)
         await SecureStore.setItemAsync('hgy_medecin', JSON.stringify(d.medecin))
@@ -52,7 +55,10 @@ export function MedecinAuthProvider({ children }: { children: React.ReactNode })
         return { success: true }
       }
       return { success: false, message: d.message || 'Identifiants incorrects.' }
-    } catch { return { success: false, message: 'Erreur réseau.' } }
+    } catch (e: any) {
+      console.log('Medecin login error:', e?.message)
+      return { success: false, message: 'Erreur réseau: ' + (e?.message || '') }
+    }
   }
 
   const logout = async () => {

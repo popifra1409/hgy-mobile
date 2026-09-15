@@ -3,14 +3,17 @@ import * as SecureStore from 'expo-secure-store'
 
 const API = 'https://hopitalgeneraldeyaounde.cm/portail/public/api/v1'
 
+export interface StaffPermissions {
+  rdv_view: boolean; rdv_confirm: boolean; rdv_cancel: boolean; rdv_edit: boolean
+  planning_view: boolean; planning_create: boolean; planning_edit: boolean; planning_delete: boolean
+  patients_view: boolean; stats_view: boolean
+}
+
 interface StaffUser {
-  id: number
-  name: string
-  email: string
+  id: number; name: string; email: string
   roles: string[]
-  can_confirm_rdv: boolean
-  can_cancel_rdv: boolean
-  can_renvoyer_rdv: boolean
+  can_confirm_rdv: boolean; can_cancel_rdv: boolean; can_renvoyer_rdv: boolean
+  permissions?: StaffPermissions
 }
 
 interface StaffAuthContextType {
@@ -41,12 +44,15 @@ export function StaffAuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const r = await fetch(`${API}/staff/login`, {
+      console.log('Staff login attempt:', email, API)
+      const r = await fetch(`${API}/gestion/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
-      const d = await r.json()
+      const text = await r.text()
+      console.log('Staff login response:', r.status, text.slice(0, 200))
+      const d = JSON.parse(text)
       if (d.success && d.token) {
         await SecureStore.setItemAsync('hgy_staff_token', d.token)
         await SecureStore.setItemAsync('hgy_staff', JSON.stringify(d.user))
@@ -54,7 +60,10 @@ export function StaffAuthProvider({ children }: { children: React.ReactNode }) {
         return { success: true }
       }
       return { success: false, message: d.message || 'Identifiants incorrects.' }
-    } catch { return { success: false, message: 'Erreur réseau.' } }
+    } catch (e: any) {
+      console.log('Staff login error:', e?.message)
+      return { success: false, message: 'Erreur réseau: ' + (e?.message || '') }
+    }
   }
 
   const logout = async () => {

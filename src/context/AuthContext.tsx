@@ -49,12 +49,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const loginByPhone = async (telephone: string, code: string): Promise<boolean> => {
     try {
+      console.log('Patient login attempt:', telephone, API)
       const res = await fetch(`${API}/patient/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify({ login: telephone, password: code }),
       })
-      const data = await res.json()
+      const text = await res.text()
+      console.log('Patient login response:', res.status, text.slice(0, 300))
+      const data = JSON.parse(text)
       if (data.success && data.token) {
         await SecureStore.setItemAsync('hgy_token', data.token)
         await SecureStore.setItemAsync('hgy_patient', JSON.stringify(data.patient))
@@ -63,7 +66,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return true
       }
       return false
-    } catch { return false }
+    } catch (e: any) {
+      console.log('Patient login error:', e?.message)
+      return false
+    }
   }
 
   const logout = async () => {

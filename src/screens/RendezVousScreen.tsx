@@ -145,13 +145,15 @@ export default function RendezVousScreen({ navigation, route }: any) {
       const dh = new Date(selectedDate!)
       const [h, m] = selectedHeure.split(':')
       dh.setHours(+h, +m, 0)
-      const r = await rdvService.creer({
+      const payload = {
         nom: form.nom, prenom: form.prenom,
         telephone: form.telephone, email: form.email || null,
         motif: form.motif || null, medecin_id: medecinId,
         specialite_id: specId, planning_id: selectedPlanning?.id,
         date_heure: dh.toISOString(), type: 'presentiel',
-      })
+      }
+      console.log('RDV Payload:', JSON.stringify(payload))
+      const r = await rdvService.creer(payload)
       setReference(r.data?.reference || r.data?.data?.reference || '')
       setSubmitted(true)
     } catch {

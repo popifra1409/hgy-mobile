@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import * as Notifications from 'expo-notifications'
 import { registerForPushNotifications } from '../services/notifications'
 import { useAuth } from '../context/AuthContext'
 
@@ -10,32 +9,25 @@ export function useNotifications(navigation?: any) {
   const responseListener = useRef<any>()
 
   useEffect(() => {
-    // Enregistre pour les notifications push
     registerForPushNotifications(patient?.id ?? null)
-      .then(token => {
-        if (token) setPushToken(token)
+      .then(token => { if (token) setPushToken(token) })
+
+    try {
+      const Notifications = require('expo-notifications')
+      notifListener.current = Notifications.addNotificationReceivedListener((n: any) => {
+        console.log('Notification reçue:', n.request.content.title)
       })
-
-    // Écoute les notifications reçues (app ouverte)
-    notifListener.current = Notifications.addNotificationReceivedListener(notif => {
-      console.log('Notification reçue:', notif)
-    })
-
-    // Écoute les clics sur les notifications
-    responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-      const data = response.notification.request.content.data
-      if (navigation) {
-        if (data?.rdvId) {
-          navigation.navigate('MonEspaceTab')
-        } else if (data?.resultatId) {
-          navigation.navigate('MonEspaceTab')
-        }
-      }
-    })
+      responseListener.current = Notifications.addNotificationResponseReceivedListener((r: any) => {
+        const data = r.notification.request.content.data
+        if (navigation && data?.rdvId) navigation.navigate('MonEspaceTab')
+      })
+    } catch {}
 
     return () => {
-      Notifications.removeNotificationSubscription(notifListener.current)
-      Notifications.removeNotificationSubscription(responseListener.current)
+      try {
+        notifListener.current?.remove()
+        responseListener.current?.remove()
+      } catch {}
     }
   }, [patient?.id])
 
