@@ -5,11 +5,11 @@ import { useAuth } from '../context/AuthContext'
 export function useNotifications(navigation?: any) {
   const { patient } = useAuth()
   const [pushToken, setPushToken] = useState<string | null>(null)
-  const notifListener    = useRef<any>()
-  const responseListener = useRef<any>()
+  const notifListener    = useRef<any>(null)
+  const responseListener = useRef<any>(null)
 
   useEffect(() => {
-    registerForPushNotifications(patient?.id ?? null)
+    registerForPushNotifications(patient?.id ?? undefined)
       .then(token => { if (token) setPushToken(token) })
 
     try {

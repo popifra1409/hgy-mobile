@@ -2,7 +2,8 @@ import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { View, Text } from 'react-native'
+import { View, Text, Platform } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { COLORS } from '../constants/theme'
 
 // Screens principaux
@@ -30,6 +31,7 @@ import ChatbotScreen        from '../screens/ChatbotScreen'
 // Screens professionnels
 import MedecinEspaceScreen  from '../screens/MedecinEspaceScreen'
 import StaffEspaceScreen    from '../screens/StaffEspaceScreen'
+import PublicationScreen    from '../screens/PublicationScreen'
 
 const Tab   = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -106,19 +108,23 @@ function PlusStackScreen() {
       {/* Accès professionnels discrets */}
       <PlusStack.Screen name="MedecinTab"     component={MedecinEspaceScreen} />
       <PlusStack.Screen name="StaffTab"       component={StaffEspaceScreen} />
+      <PlusStack.Screen name="Publication"   component={PublicationScreen} />
     </PlusStack.Navigator>
   )
 }
 
 function MainTabs() {
+  const insets = useSafeAreaInsets()
+  const tabBarHeight = 56 + (Platform.OS === 'android' ? insets.bottom : 0)
+
   return (
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
-          height: 60,
-          paddingBottom: 4,
+          height: tabBarHeight,
+          paddingBottom: Platform.OS === 'android' ? insets.bottom : 4,
           paddingTop: 4,
           backgroundColor: COLORS.white,
           borderTopWidth: 1,
@@ -127,6 +133,10 @@ function MainTabs() {
           shadowColor: '#000',
           shadowOpacity: 0.1,
           shadowRadius: 16,
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
         },
       }}>
       <Tab.Screen name="AccueilTab" component={AccueilStackScreen}

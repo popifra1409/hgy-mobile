@@ -23,7 +23,7 @@ const STATUT_CONFIG: Record<string,any> = {
 export default function StaffEspaceScreen({ navigation }: any) {
   const { staff, isAuthenticated, login, logout } = useStaffAuth()
   const { lang } = useLang()
-  const [tab,        setTab]        = useState<'rdv'|'planning'|'stats'>('rdv')
+  const [tab,        setTab]        = useState<'rdv'|'planning'|'stats'|'indispos'|'patients'>('rdv')
   const [rdvs,       setRdvs]       = useState<any[]>([])
   const [planning,   setPlanning]   = useState<any[]>([])
   const [medecins,   setMedecins]   = useState<any[]>([])
@@ -34,6 +34,13 @@ export default function StaffEspaceScreen({ navigation }: any) {
   const [search,     setSearch]     = useState('')
   const [selectedRdv,setSelectedRdv]= useState<any>(null)
   const [raisonAnnul,setRaisonAnnul]= useState('')
+  const [indispos,   setIndispos]   = useState<any[]>([])
+  const [showIndispoModal, setShowIndispoModal] = useState(false)
+  const [editIndispo,  setEditIndispo]  = useState<any>(null)
+  const [indispoForm,  setIndispoForm]  = useState({
+    medecin_id:'', date_debut:'', date_fin:'',
+    motif:'conge', type:'indisponibilite', remplacant_id:'', notes:''
+  })
   const [patients,   setPatients]   = useState<any[]>([])
   const [searchPat,  setSearchPat]  = useState('')
   const [filterPat,  setFilterPat]  = useState('temporaire')
@@ -70,6 +77,15 @@ export default function StaffEspaceScreen({ navigation }: any) {
     setRdvs(d?.data || [])
   }
 
+  const loadIndispos = async () => {
+    const token = await getToken()
+    const r = await fetch(`${API}/gestion/indisponibilites`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }
+    })
+    const d = await r.json()
+    setIndispos(d?.data || [])
+  }
+
   const loadPatients = async () => {
     const token = await getToken()
     const url = filterPat === 'all'
@@ -98,7 +114,7 @@ export default function StaffEspaceScreen({ navigation }: any) {
   const loadAll = async () => {
     if (!staff) return setLoading(false)
     try {
-      await Promise.all([loadPerms(), loadRdvs(), loadPlanning(), loadMedecins(), loadPatients()])
+      await Promise.all([loadPerms(), loadRdvs(), loadPlanning(), loadMedecins(), loadPatients(), loadIndispos()])
     } catch {}
     finally { setLoading(false); setRefreshing(false) }
   }
@@ -148,6 +164,39 @@ export default function StaffEspaceScreen({ navigation }: any) {
       else Alert.alert('Erreur', d.message)
     } catch { Alert.alert('Erreur', 'Erreur réseau.') }
   }
+
+  const saveIndispo = async () => {
+    if (!indispoForm.medecin_id || !indispoForm.date_debut || !indispoForm.date_fin) {
+      Alert.alert('Erreur', lang==='fr'?'Médecin, dates début et fin sont requis.':'Doctor and dates are required.')
+      return
+    }
+    try {
+      const token = await getToken()
+      const url    = editIndispo ? `${API}/gestion/indisponibilites/${editIndispo.id}` : `${API}/gestion/indisponibilites`
+      const method = editIndispo ? 'PUT' : 'POST'
+      const res = await fetch(url, {
+        method,
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ ...indispoForm, medecin_id: parseInt(indispoForm.medecin_id) }),
+      })
+      const d = await res.json()
+      setShowIndispoModal(false); setEditIndispo(null)
+      if (d.success) {
+        Alert.alert('✅', d.message)
+        loadIndispos(); loadRdvs()
+      } else Alert.alert('Erreur', d.message)
+    } catch { Alert.alert('Erreur', 'Erreur réseau.') }
+  }
+
+  const deleteIndispo = async (id: number) => {
+    const token = await getToken()
+    await fetch(`${API}/gestion/indisponibilites/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+    })
+    loadIndispos()
+  }
+
 
   const validerDossier = async () => {
     if (!codeOfficiel.trim()) { Alert.alert('Erreur', 'Le code officiel est requis.'); return }
@@ -223,6 +272,8 @@ export default function StaffEspaceScreen({ navigation }: any) {
     perms.rdv_view    && { id:'rdv',      fr:'📅 RDV',      en:'📅 RDVs' },
     perms.planning_view && { id:'planning', fr:'🗓 Planning',  en:'🗓 Schedule' },
     perms.patients_view && { id:'patients', fr:'👤 Patients', en:'👤 Patients' },
+    perms['planning_create'] && { id:'indispos', fr:'🚫 Indisponibilités', en:'🚫 Unavailability' },
+    perms['planning_create'] && { id:'indispos', fr:'🚫 Indisponibilités', en:'🚫 Unavailability' },
   ].filter(Boolean) as any[]
 
   return (
@@ -349,6 +400,134 @@ export default function StaffEspaceScreen({ navigation }: any) {
                   </TouchableOpacity>
                 )
               })}
+            </>
+          )}
+
+          {/* ═══ TAB INDISPONIBILITÉS ═══ */}
+          {tab === 'indispos' && (
+            <>
+              <TouchableOpacity style={[s.btn, { marginBottom:14 }]}
+                onPress={() => {
+                  setEditIndispo(null)
+                  setIndispoForm({ medecin_id:'', date_debut:'', date_fin:'', motif:'conge', type:'indisponibilite', remplacant_id:'', notes:'' })
+                  setShowIndispoModal(true)
+                }}>
+                <Text style={s.btnTxt}>➕ {lang==='fr'?'Nouvelle indisponibilité':'New unavailability'}</Text>
+              </TouchableOpacity>
+
+              {indispos.length === 0 ? (
+                <View style={s.empty}><Text style={{ fontSize:40 }}>🚫</Text>
+                  <Text style={s.emptyTxt}>{lang==='fr'?'Aucune indisponibilité.':'No unavailability.'}</Text>
+                </View>
+              ) : indispos.map((m:any, i:number) => (
+                <View key={i} style={[s.planCard, m.est_active_auj && { borderLeftWidth:3, borderLeftColor:'#DC2626' }]}>
+                  <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'flex-start' }}>
+                    <View style={{ flex:1 }}>
+                      <Text style={s.planMedecin}>
+                        {m.motif_icon} {m.medecin}
+                        {m.est_active_auj && <Text style={{ color:'#DC2626', fontSize:11 }}> — En cours</Text>}
+                      </Text>
+                      <View style={[s.badge, { backgroundColor:'#FEF2F2', alignSelf:'flex-start', marginVertical:4 }]}>
+                        <Text style={[s.badgeTxt, { color:'#DC2626' }]}>{m.motif_label}</Text>
+                      </View>
+                      <Text style={s.planHoraire}>
+                        📅 {m.date_debut} → {m.date_fin}
+                      </Text>
+                      {m.remplacant && (
+                        <Text style={[s.planSpec, { color:'#059669' }]}>
+                          👨‍⚕️ Remplaçant: {m.remplacant}
+                        </Text>
+                      )}
+                      {m.notes && <Text style={s.planMax}>💬 {m.notes}</Text>}
+                      {!m.actif && <Text style={{ fontSize:11, color:COLORS.gray400 }}>❌ Désactivée</Text>}
+                    </View>
+                    <View style={{ flexDirection:'row', gap:6 }}>
+                      <TouchableOpacity style={s.editBtn} onPress={() => {
+                        setEditIndispo(m)
+                        setIndispoForm({
+                          medecin_id: String(m.medecin_id),
+                          date_debut: m.date_debut,
+                          date_fin: m.date_fin,
+                          motif: m.motif,
+                          type: m.type || 'indisponibilite',
+                          remplacant_id: m.remplacant ? String(m.remplacant_id||'') : '',
+                          notes: m.notes || '',
+                        })
+                        setShowIndispoModal(true)
+                      }}>
+                        <Text>✏️</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={s.deleteBtn} onPress={() => deleteIndispo(m.id)}>
+                        <Text>🗑</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </>
+          )}
+
+          {/* ═══ TAB INDISPONIBILITÉS ═══ */}
+          {tab === 'indispos' && (
+            <>
+              <TouchableOpacity style={[s.btn, { marginBottom:14 }]}
+                onPress={() => {
+                  setEditIndispo(null)
+                  setIndispoForm({ medecin_id:'', date_debut:'', date_fin:'', motif:'conge', type:'indisponibilite', remplacant_id:'', notes:'' })
+                  setShowIndispoModal(true)
+                }}>
+                <Text style={s.btnTxt}>➕ {lang==='fr'?'Nouvelle indisponibilité':'New unavailability'}</Text>
+              </TouchableOpacity>
+
+              {indispos.length === 0 ? (
+                <View style={s.empty}><Text style={{ fontSize:40 }}>🚫</Text>
+                  <Text style={s.emptyTxt}>{lang==='fr'?'Aucune indisponibilité.':'No unavailability.'}</Text>
+                </View>
+              ) : indispos.map((m:any, i:number) => (
+                <View key={i} style={[s.planCard, m.est_active_auj && { borderLeftWidth:3, borderLeftColor:'#DC2626' }]}>
+                  <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'flex-start' }}>
+                    <View style={{ flex:1 }}>
+                      <Text style={s.planMedecin}>
+                        {m.motif_icon} {m.medecin}
+                        {m.est_active_auj && <Text style={{ color:'#DC2626', fontSize:11 }}> — En cours</Text>}
+                      </Text>
+                      <View style={[s.badge, { backgroundColor:'#FEF2F2', alignSelf:'flex-start', marginVertical:4 }]}>
+                        <Text style={[s.badgeTxt, { color:'#DC2626' }]}>{m.motif_label}</Text>
+                      </View>
+                      <Text style={s.planHoraire}>
+                        📅 {m.date_debut} → {m.date_fin}
+                      </Text>
+                      {m.remplacant && (
+                        <Text style={[s.planSpec, { color:'#059669' }]}>
+                          👨‍⚕️ Remplaçant: {m.remplacant}
+                        </Text>
+                      )}
+                      {m.notes && <Text style={s.planMax}>💬 {m.notes}</Text>}
+                      {!m.actif && <Text style={{ fontSize:11, color:COLORS.gray400 }}>❌ Désactivée</Text>}
+                    </View>
+                    <View style={{ flexDirection:'row', gap:6 }}>
+                      <TouchableOpacity style={s.editBtn} onPress={() => {
+                        setEditIndispo(m)
+                        setIndispoForm({
+                          medecin_id: String(m.medecin_id),
+                          date_debut: m.date_debut,
+                          date_fin: m.date_fin,
+                          motif: m.motif,
+                          type: m.type || 'indisponibilite',
+                          remplacant_id: m.remplacant ? String(m.remplacant_id||'') : '',
+                          notes: m.notes || '',
+                        })
+                        setShowIndispoModal(true)
+                      }}>
+                        <Text>✏️</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={s.deleteBtn} onPress={() => deleteIndispo(m.id)}>
+                        <Text>🗑</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              ))}
             </>
           )}
 
@@ -518,6 +697,194 @@ export default function StaffEspaceScreen({ navigation }: any) {
         </View>
       </Modal>
 
+      {/* ── Modal Indisponibilité ── */}
+      <Modal visible={showIndispoModal} transparent animationType="slide" onRequestClose={() => setShowIndispoModal(false)}>
+        <View style={s.modalOverlay}>
+          <ScrollView>
+            <View style={[s.modalCard, { margin:16 }]}>
+              <Text style={s.modalTitle}>
+                {editIndispo ? '✏️ Modifier' : '🚫 Nouvelle indisponibilité'}
+              </Text>
+
+              <Text style={s.label}>{lang==='fr'?'Médecin *':'Doctor *'}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom:12 }}>
+                {medecins.map((m:any) => (
+                  <TouchableOpacity key={m.id}
+                    style={[s.filterChip, indispoForm.medecin_id===String(m.id) && s.filterChipActive, { marginRight:6 }]}
+                    onPress={() => setIndispoForm(p => ({ ...p, medecin_id: String(m.id) }))}>
+                    <Text style={[s.filterChipTxt, indispoForm.medecin_id===String(m.id) && { color:'#fff' }]} numberOfLines={1}>
+                      {m.nom_complet}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <Text style={s.label}>{lang==='fr'?'Motif *':'Reason *'}</Text>
+              <View style={{ flexDirection:'row', flexWrap:'wrap', gap:6, marginBottom:12 }}>
+                {[
+                  { id:'conge',      fr:'🏖️ Congé',      en:'🏖️ Leave' },
+                  { id:'permission', fr:'📋 Permission',  en:'📋 Permission' },
+                  { id:'maladie',    fr:'🤒 Maladie',     en:'🤒 Sick' },
+                  { id:'formation',  fr:'📚 Formation',   en:'📚 Training' },
+                  { id:'mission',    fr:'✈️ Mission',      en:'✈️ Mission' },
+                  { id:'autre',      fr:'📌 Autre',       en:'📌 Other' },
+                ].map(m => (
+                  <TouchableOpacity key={m.id}
+                    style={[s.filterChip, indispoForm.motif===m.id && s.filterChipActive]}
+                    onPress={() => setIndispoForm(p => ({ ...p, motif: m.id }))}>
+                    <Text style={[s.filterChipTxt, indispoForm.motif===m.id && { color:'#fff' }]}>
+                      {lang==='fr'?m.fr:m.en}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={{ flexDirection:'row', gap:10, marginBottom:12 }}>
+                <View style={{ flex:1 }}>
+                  <Text style={s.label}>{lang==='fr'?'Du *':'From *'}</Text>
+                  <TextInput style={s.input} value={indispoForm.date_debut}
+                    onChangeText={v => setIndispoForm(p => ({ ...p, date_debut: v }))}
+                    placeholder="YYYY-MM-DD" placeholderTextColor={COLORS.gray400} />
+                </View>
+                <View style={{ flex:1 }}>
+                  <Text style={s.label}>{lang==='fr'?'Au *':'To *'}</Text>
+                  <TextInput style={s.input} value={indispoForm.date_fin}
+                    onChangeText={v => setIndispoForm(p => ({ ...p, date_fin: v }))}
+                    placeholder="YYYY-MM-DD" placeholderTextColor={COLORS.gray400} />
+                </View>
+              </View>
+
+              <Text style={s.label}>{lang==='fr'?'Remplaçant (optionnel)':'Replacement (optional)'}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom:12 }}>
+                <TouchableOpacity style={[s.filterChip, !indispoForm.remplacant_id && s.filterChipActive, { marginRight:6 }]}
+                  onPress={() => setIndispoForm(p => ({ ...p, remplacant_id: '' }))}>
+                  <Text style={[s.filterChipTxt, !indispoForm.remplacant_id && { color:'#fff' }]}>Aucun</Text>
+                </TouchableOpacity>
+                {medecins.filter((m:any) => String(m.id) !== indispoForm.medecin_id).map((m:any) => (
+                  <TouchableOpacity key={m.id}
+                    style={[s.filterChip, indispoForm.remplacant_id===String(m.id) && s.filterChipActive, { marginRight:6 }]}
+                    onPress={() => setIndispoForm(p => ({ ...p, remplacant_id: String(m.id) }))}>
+                    <Text style={[s.filterChipTxt, indispoForm.remplacant_id===String(m.id) && { color:'#fff' }]} numberOfLines={1}>
+                      {m.nom_complet}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <Text style={s.label}>{lang==='fr'?'Notes (optionnel)':'Notes (optional)'}</Text>
+              <TextInput style={[s.input, { marginBottom:16 }]} value={indispoForm.notes}
+                onChangeText={v => setIndispoForm(p => ({ ...p, notes: v }))}
+                placeholder={lang==='fr'?'Informations complémentaires…':'Additional information…'}
+                placeholderTextColor={COLORS.gray400} multiline />
+
+              <View style={{ flexDirection:'row', gap:10 }}>
+                <TouchableOpacity style={[s.btn, { flex:1, backgroundColor:COLORS.gray400 }]}
+                  onPress={() => setShowIndispoModal(false)}>
+                  <Text style={s.btnTxt}>{lang==='fr'?'Annuler':'Cancel'}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[s.btn, { flex:1, backgroundColor:'#DC2626' }]} onPress={saveIndispo}>
+                  <Text style={s.btnTxt}>{lang==='fr'?'Enregistrer':'Save'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* ── Modal Indisponibilité ── */}
+      <Modal visible={showIndispoModal} transparent animationType="slide" onRequestClose={() => setShowIndispoModal(false)}>
+        <View style={s.modalOverlay}>
+          <ScrollView>
+            <View style={[s.modalCard, { margin:16 }]}>
+              <Text style={s.modalTitle}>
+                {editIndispo ? '✏️ Modifier' : '🚫 Nouvelle indisponibilité'}
+              </Text>
+
+              <Text style={s.label}>{lang==='fr'?'Médecin *':'Doctor *'}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom:12 }}>
+                {medecins.map((m:any) => (
+                  <TouchableOpacity key={m.id}
+                    style={[s.filterChip, indispoForm.medecin_id===String(m.id) && s.filterChipActive, { marginRight:6 }]}
+                    onPress={() => setIndispoForm(p => ({ ...p, medecin_id: String(m.id) }))}>
+                    <Text style={[s.filterChipTxt, indispoForm.medecin_id===String(m.id) && { color:'#fff' }]} numberOfLines={1}>
+                      {m.nom_complet}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <Text style={s.label}>{lang==='fr'?'Motif *':'Reason *'}</Text>
+              <View style={{ flexDirection:'row', flexWrap:'wrap', gap:6, marginBottom:12 }}>
+                {[
+                  { id:'conge',      fr:'🏖️ Congé',      en:'🏖️ Leave' },
+                  { id:'permission', fr:'📋 Permission',  en:'📋 Permission' },
+                  { id:'maladie',    fr:'🤒 Maladie',     en:'🤒 Sick' },
+                  { id:'formation',  fr:'📚 Formation',   en:'📚 Training' },
+                  { id:'mission',    fr:'✈️ Mission',      en:'✈️ Mission' },
+                  { id:'autre',      fr:'📌 Autre',       en:'📌 Other' },
+                ].map(m => (
+                  <TouchableOpacity key={m.id}
+                    style={[s.filterChip, indispoForm.motif===m.id && s.filterChipActive]}
+                    onPress={() => setIndispoForm(p => ({ ...p, motif: m.id }))}>
+                    <Text style={[s.filterChipTxt, indispoForm.motif===m.id && { color:'#fff' }]}>
+                      {lang==='fr'?m.fr:m.en}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={{ flexDirection:'row', gap:10, marginBottom:12 }}>
+                <View style={{ flex:1 }}>
+                  <Text style={s.label}>{lang==='fr'?'Du *':'From *'}</Text>
+                  <TextInput style={s.input} value={indispoForm.date_debut}
+                    onChangeText={v => setIndispoForm(p => ({ ...p, date_debut: v }))}
+                    placeholder="YYYY-MM-DD" placeholderTextColor={COLORS.gray400} />
+                </View>
+                <View style={{ flex:1 }}>
+                  <Text style={s.label}>{lang==='fr'?'Au *':'To *'}</Text>
+                  <TextInput style={s.input} value={indispoForm.date_fin}
+                    onChangeText={v => setIndispoForm(p => ({ ...p, date_fin: v }))}
+                    placeholder="YYYY-MM-DD" placeholderTextColor={COLORS.gray400} />
+                </View>
+              </View>
+
+              <Text style={s.label}>{lang==='fr'?'Remplaçant (optionnel)':'Replacement (optional)'}</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom:12 }}>
+                <TouchableOpacity style={[s.filterChip, !indispoForm.remplacant_id && s.filterChipActive, { marginRight:6 }]}
+                  onPress={() => setIndispoForm(p => ({ ...p, remplacant_id: '' }))}>
+                  <Text style={[s.filterChipTxt, !indispoForm.remplacant_id && { color:'#fff' }]}>Aucun</Text>
+                </TouchableOpacity>
+                {medecins.filter((m:any) => String(m.id) !== indispoForm.medecin_id).map((m:any) => (
+                  <TouchableOpacity key={m.id}
+                    style={[s.filterChip, indispoForm.remplacant_id===String(m.id) && s.filterChipActive, { marginRight:6 }]}
+                    onPress={() => setIndispoForm(p => ({ ...p, remplacant_id: String(m.id) }))}>
+                    <Text style={[s.filterChipTxt, indispoForm.remplacant_id===String(m.id) && { color:'#fff' }]} numberOfLines={1}>
+                      {m.nom_complet}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+
+              <Text style={s.label}>{lang==='fr'?'Notes (optionnel)':'Notes (optional)'}</Text>
+              <TextInput style={[s.input, { marginBottom:16 }]} value={indispoForm.notes}
+                onChangeText={v => setIndispoForm(p => ({ ...p, notes: v }))}
+                placeholder={lang==='fr'?'Informations complémentaires…':'Additional information…'}
+                placeholderTextColor={COLORS.gray400} multiline />
+
+              <View style={{ flexDirection:'row', gap:10 }}>
+                <TouchableOpacity style={[s.btn, { flex:1, backgroundColor:COLORS.gray400 }]}
+                  onPress={() => setShowIndispoModal(false)}>
+                  <Text style={s.btnTxt}>{lang==='fr'?'Annuler':'Cancel'}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={[s.btn, { flex:1, backgroundColor:'#DC2626' }]} onPress={saveIndispo}>
+                  <Text style={s.btnTxt}>{lang==='fr'?'Enregistrer':'Save'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+
       {/* ── Modal Validation Dossier Patient ── */}
       <Modal visible={!!selectedPat} transparent animationType="slide" onRequestClose={() => setSelectedPat(null)}>
         <View style={s.modalOverlay}>
@@ -628,6 +995,7 @@ export default function StaffEspaceScreen({ navigation }: any) {
       </Modal>
     </SafeAreaView>
   )
+
 }
 
 const s = StyleSheet.create({

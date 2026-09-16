@@ -25,6 +25,7 @@ const MENU_ITEMS = (lang: string, patient: any) => [
   {
     section: lang === 'fr' ? '🔐 Accès professionnel' : '🔐 Professional access',
     items: [
+      { icon: '📝', label: lang==='fr'?'Publications WP':'WP Publications',     screen: 'Publication', color: '#E05D00' },
       { icon: '🩺', label: lang==='fr'?'Espace Médecin':'Doctor Portal',      screen: 'MedecinTab', color: COLORS.primary },
       { icon: '👩‍💼', label: lang==='fr'?'Espace Gestion':'Staff Portal',       screen: 'StaffTab',   color: '#0F766E' },
     ]

@@ -4,7 +4,7 @@ import {
   StyleSheet, RefreshControl, ActivityIndicator,
   Linking, Platform
 } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { blogService, rdvService, parametresService } from '../services/api'
 import { useLang } from '../context/LangContext'
 import { useAuth } from '../context/AuthContext'
@@ -39,13 +39,16 @@ export default function AccueilScreen({ navigation }: any) {
         rdvService.planningJour(),
         parametresService.get(),
       ])
+      console.log('Articles:', art.data?.data?.length, 'Emissions:', emi.data?.data?.length)
       setArticles(art.data?.data || [])
       setEmissions(emi.data?.data || [])
       const planData = plan.data?.data || []
       setPlanningJour(planData.filter((p: any) => p.medecin && !p.__spec_vide))
       setMetaJour({ jour: plan.data?.jour || '', date: plan.data?.date || '' })
       setParametres(params.data?.data || {})
-    } catch {}
+    } catch (e: any) {
+      console.log('AccueilScreen load error:', e?.message)
+    }
     finally { setLoading(false); setRefreshing(false) }
   }
 
@@ -76,7 +79,7 @@ export default function AccueilScreen({ navigation }: any) {
     <SafeAreaView style={s.safe}>
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load() }} tintColor={COLORS.primary} />}
-        contentContainerStyle={{ paddingBottom: 100 }}>
+        contentContainerStyle={{ paddingBottom: 120 }}>
 
         {/* ── Hero ── */}
         <View style={s.hero}>
