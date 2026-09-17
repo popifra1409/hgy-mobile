@@ -13,7 +13,6 @@ type PubType = 'article' | 'emission'
 
 export default function PublicationScreen({ navigation }: any) {
   const { lang } = useLang()
-  const { isAuthenticated } = useStaffAuth()
   const [activeTab,  setActiveTab]  = useState<PubType>('article')
   const [articles,   setArticles]   = useState<any[]>([])
   const [emissions,  setEmissions]  = useState<any[]>([])
@@ -34,14 +33,26 @@ export default function PublicationScreen({ navigation }: any) {
 
   const load = async () => {
     try {
-      const [arts, emis] = await Promise.all([
-        wpService.getArticles('any'),
-        wpService.getEmissions('any'),
-      ])
-      setArticles(Array.isArray(arts) ? arts : [])
-      setEmissions(Array.isArray(emis) ? emis : [])
-    } catch (e) { console.log('WP load error:', e) }
-    finally { setLoading(false) }
+      // Charge séparément pour éviter crash si l'un échoue
+      let arts: any[] = []
+      let emis: any[] = []
+      try {
+        const r = await wpService.getArticles('any')
+        arts = Array.isArray(r) ? r : []
+      } catch(e) { console.log('WP articles error:', e) }
+
+      try {
+        const r = await wpService.getEmissions('any')
+        emis = Array.isArray(r) ? r : []
+      } catch(e) { console.log('WP emissions error:', e) }
+
+      setArticles(arts)
+      setEmissions(emis)
+    } catch (e) {
+      console.log('WP load error:', e)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [])
@@ -166,7 +177,7 @@ export default function PublicationScreen({ navigation }: any) {
                 <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'flex-start' }}>
                   <View style={{ flex:1, marginRight:10 }}>
                     <Text style={s.cardTitle} numberOfLines={2}>
-                      {a.title?.rendered || a.title}
+                      {(typeof a.title === 'object' ? a.title?.rendered : a.title) || '—'}
                     </Text>
                     <Text style={s.cardDate}>{a.date ? formatDate(a.date) : '—'}</Text>
                   </View>
@@ -198,7 +209,7 @@ export default function PublicationScreen({ navigation }: any) {
                 <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'flex-start' }}>
                   <View style={{ flex:1, marginRight:10 }}>
                     <Text style={s.cardTitle} numberOfLines={2}>
-                      {e.title?.rendered || e.title}
+                      {(typeof e.title === 'object' ? e.title?.rendered : e.title) || '—'}
                     </Text>
                     <Text style={s.cardDate}>{e.date ? formatDate(e.date) : '—'}</Text>
                   </View>
