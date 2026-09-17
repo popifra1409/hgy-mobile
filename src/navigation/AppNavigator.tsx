@@ -31,7 +31,8 @@ import ChatbotScreen        from '../screens/ChatbotScreen'
 // Screens professionnels
 import MedecinEspaceScreen  from '../screens/MedecinEspaceScreen'
 import StaffEspaceScreen    from '../screens/StaffEspaceScreen'
-import PublicationScreen    from '../screens/PublicationScreen'
+import PublicationScreen       from '../screens/PublicationScreen'
+import CampagneGestionScreen  from '../screens/CampagneGestionScreen'
 
 const Tab   = createBottomTabNavigator()
 const Stack = createNativeStackNavigator()
@@ -108,7 +109,8 @@ function PlusStackScreen() {
       {/* Accès professionnels discrets */}
       <PlusStack.Screen name="MedecinTab"     component={MedecinEspaceScreen} />
       <PlusStack.Screen name="StaffTab"       component={StaffEspaceScreen} />
-      <PlusStack.Screen name="Publication"   component={PublicationScreen} />
+      <PlusStack.Screen name="Publication"      component={PublicationScreen} />
+      <PlusStack.Screen name="CampagneGestion" component={CampagneGestionScreen} />
     </PlusStack.Navigator>
   )
 }

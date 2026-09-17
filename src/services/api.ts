@@ -74,7 +74,7 @@ export default api
 
 // ── WordPress Publication ──
 const WP_API  = 'https://hopitalgeneraldeyaounde.cm/wpblog/wp-json/wp/v2'
-const WP_AUTH = 'Basic ' + btoa('adminHGY:ofMwL4JuwcicewCpUxojhASr')
+const WP_AUTH = 'Basic YWRtaW5IR1k6b2ZNd0w0SnV3Y2ljZXdDcFV4b2poQVNy' // adminHGY:ofMwL4JuwcicewCpUxojhASr
 
 export const wpService = {
   // Articles
