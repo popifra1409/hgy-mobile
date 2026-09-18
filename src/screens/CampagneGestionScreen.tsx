@@ -27,6 +27,8 @@ export default function CampagneGestionScreen({ navigation }: any) {
   const [refreshing,   setRefreshing]   = useState(false)
   const [tab,          setTab]          = useState<'liste'|'inscrits'>('liste')
   const [loadingPart,  setLoadingPart]  = useState(false)
+  const [searchCamp,   setSearchCamp]   = useState('')
+  const [searchPart,   setSearchPart]   = useState('')
 
   const getToken = async () => await SecureStore.getItemAsync('hgy_staff_token')
 
@@ -50,6 +52,26 @@ export default function CampagneGestionScreen({ navigation }: any) {
       setParticipants(d?.data || [])
     } catch {}
     finally { setLoadingPart(false) }
+  }
+
+  const deleteParticipant = async (campId: number, partId: number) => {
+    Alert.alert(
+      lang==='fr'?'Supprimer ?':'Delete?',
+      lang==='fr'?'Supprimer ce participant définitivement ?':'Delete this participant permanently?',
+      [
+        { text: lang==='fr'?'Annuler':'Cancel', style:'cancel' },
+        { text: lang==='fr'?'Supprimer':'Delete', style:'destructive', onPress: async () => {
+          try {
+            const token = await getToken()
+            await fetch(`${API}/gestion/campagnes/${campId}/participants/${partId}`, {
+              method: 'DELETE',
+              headers: { Authorization:`Bearer ${token}`, Accept:'application/json' }
+            })
+            loadParticipants(campId)
+          } catch { Alert.alert('Erreur', 'Erreur réseau.') }
+        }}
+      ]
+    )
   }
 
   const togglePresence = async (campId: number, partId: number) => {
@@ -104,6 +126,15 @@ export default function CampagneGestionScreen({ navigation }: any) {
       ) : (
         <ScrollView contentContainerStyle={{ padding:12, paddingBottom:40 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadCampagnes() }} />}>
+
+          {/* Recherche campagnes */}
+          <TextInput
+            style={s.searchInput}
+            value={searchCamp}
+            onChangeText={setSearchCamp}
+            placeholder={lang==='fr'?'🔍 Rechercher une campagne…':'🔍 Search campaign…'}
+            placeholderTextColor={COLORS.gray400}
+          />
 
           {campagnes.length === 0 ? (
             <View style={s.empty}>
@@ -216,6 +247,17 @@ export default function CampagneGestionScreen({ navigation }: any) {
             </View>
           </View>
 
+          {/* Recherche participants */}
+          <View style={{ padding:12, backgroundColor:'#fff', borderBottomWidth:1, borderBottomColor:COLORS.gray200 }}>
+            <TextInput
+              style={s.searchInput}
+              value={searchPart}
+              onChangeText={setSearchPart}
+              placeholder={lang==='fr'?'🔍 Nom, email, structure…':'🔍 Name, email, institution…'}
+              placeholderTextColor={COLORS.gray400}
+            />
+          </View>
+
           {loadingPart ? (
             <View style={s.center}><ActivityIndicator color={COLORS.primary} /></View>
           ) : (
@@ -225,7 +267,13 @@ export default function CampagneGestionScreen({ navigation }: any) {
                   <Text style={{ fontSize:40 }}>👥</Text>
                   <Text style={s.emptyTxt}>{lang==='fr'?'Aucun participant.':'No participants.'}</Text>
                 </View>
-              ) : participants.map((p:any, i:number) => (
+              ) : participants.filter((p:any) =>
+                  !searchPart ||
+                  p.nom?.toLowerCase().includes(searchPart.toLowerCase()) ||
+                  p.prenom?.toLowerCase().includes(searchPart.toLowerCase()) ||
+                  p.email?.toLowerCase().includes(searchPart.toLowerCase()) ||
+                  p.structure?.toLowerCase().includes(searchPart.toLowerCase())
+                ).map((p:any, i:number) => (
                 <View key={i} style={s.partCard}>
                   <View style={{ flexDirection:'row', justifyContent:'space-between', alignItems:'flex-start' }}>
                     <View style={{ flex:1 }}>
@@ -238,6 +286,7 @@ export default function CampagneGestionScreen({ navigation }: any) {
                       <Text style={s.partInfo}>📧 {p.email}</Text>
                       <Text style={s.partDate}>Inscrit le {p.inscrit_le}</Text>
                     </View>
+                    <View style={{ gap:6, alignItems:'center' }}>
                     <TouchableOpacity
                       style={[s.presenceBtn, { backgroundColor: p.present ? '#F0FDF4':'#F9FAFB' }]}
                       onPress={() => togglePresence(selectedCamp.id, p.id)}>
@@ -246,6 +295,13 @@ export default function CampagneGestionScreen({ navigation }: any) {
                         {p.present ? 'Présent' : 'Absent'}
                       </Text>
                     </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[s.presenceBtn, { backgroundColor:'#FEF2F2', borderColor:'#FECACA' }]}
+                      onPress={() => deleteParticipant(selectedCamp.id, p.id)}>
+                      <Text style={{ fontSize:16 }}>🗑</Text>
+                      <Text style={[s.presenceTxt, { color:'#DC2626' }]}>Suppr.</Text>
+                    </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
               ))}
@@ -281,4 +337,5 @@ const s = StyleSheet.create({
   partDate:    { fontSize:10, color:COLORS.gray400, marginTop:4 },
   presenceBtn: { alignItems:'center', padding:10, borderRadius:12, borderWidth:1, borderColor:COLORS.gray200, minWidth:70 },
   presenceTxt: { fontSize:10, fontWeight:'700', marginTop:4 },
+  searchInput: { backgroundColor:'#fff', borderRadius:10, borderWidth:1, borderColor:COLORS.gray200, paddingHorizontal:12, paddingVertical:9, fontSize:13, color:COLORS.black, marginBottom:10 },
 })
