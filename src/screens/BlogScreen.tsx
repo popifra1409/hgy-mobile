@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react'
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { blogService } from '../services/api'
+import { blogService, interviewService } from '../services/api'
 import { useLang } from '../context/LangContext'
 import { COLORS, SHADOW } from '../constants/theme'
 
 export default function BlogScreen({ route, navigation }: any) {
   const { lang } = useLang()
-  const initTab = route.params?.tab === 'allo-hgy' ? 'emissions' : 'articles'
-  const [activeTab, setActiveTab] = useState<'articles'|'emissions'>(initTab)
+  const initTab = route.params?.tab === 'allo-hgy' ? 'emissions' : route.params?.tab === 'interviews' ? 'interviews' : 'articles'
+  const [activeTab, setActiveTab] = useState<'articles'|'emissions'|'interviews'>(initTab)
   const [articles,  setArticles]  = useState<any[]>([])
-  const [emissions, setEmissions] = useState<any[]>([])
+  const [emissions,  setEmissions]  = useState<any[]>([])
+  const [interviews, setInterviews] = useState<any[]>([])
   const [loading,   setLoading]   = useState(true)
   const [refreshing,setRefreshing]= useState(false)
 
   const load = async () => {
     try {
-      const [art, emi] = await Promise.all([
+      const [art, emi, interv] = await Promise.all([
         blogService.getArticles(lang, 20),
         blogService.getEmissions(lang, 20),
+        interviewService.getAll(lang, 20),
       ])
       setArticles(art.data?.data || [])
       setEmissions(emi.data?.data || [])
+      setInterviews(Array.isArray(interv.data?.data) ? interv.data.data : [])
     } catch {}
     finally { setLoading(false); setRefreshing(false) }
   }
@@ -50,6 +53,12 @@ export default function BlogScreen({ route, navigation }: any) {
           onPress={() => setActiveTab('emissions')}>
           <Text style={[s.tabTxt, activeTab==='emissions' && s.tabTxtActive]}>
             🎙️ Allo HGY
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[s.tab, activeTab==='interviews' && s.tabActive]}
+          onPress={() => setActiveTab('interviews')}>
+          <Text style={[s.tabTxt, activeTab==='interviews' && s.tabTxtActive]}>
+            🎤 {lang==='fr'?'Interviews':'Interviews'}
           </Text>
         </TouchableOpacity>
       </View>
@@ -101,6 +110,33 @@ export default function BlogScreen({ route, navigation }: any) {
               </TouchableOpacity>
             ))
           )}
+          {activeTab === 'interviews' && (
+            interviews.length === 0 ? (
+              <View style={s.empty}><Text style={{ fontSize:40 }}>🎤</Text>
+                <Text style={s.emptyTxt}>{lang==='fr'?'Aucune interview.':'No interviews.'}</Text>
+              </View>
+            ) : interviews.map((iv:any, i:number) => (
+              <TouchableOpacity key={i} style={s.card}
+                onPress={() => navigation.navigate('Article', { id: iv.id, type: 'interview' })}>
+                <View style={{ flexDirection:'row', gap:12 }}>
+                  <View style={{ flex:1 }}>
+                    <View style={[s.badge, { backgroundColor:'#F5F3FF', alignSelf:'flex-start', marginBottom:6 }]}>
+                      <Text style={[s.badgeTxt, { color:'#7C3AED' }]}>🎤 Interview</Text>
+                    </View>
+                    <Text style={s.cardTitle} numberOfLines={2}>{iv.titre}</Text>
+                    {iv.interviewe && <Text style={s.cardMeta}>👤 {iv.interviewe}</Text>}
+                    {iv.titre_interviewe && <Text style={s.cardMeta}>🏅 {iv.titre_interviewe}</Text>}
+                    {iv.thematique_interv && <Text style={s.cardMeta}>🏷️ {iv.thematique_interv}</Text>}
+                    {iv.date_interview && <Text style={s.cardDate}>{new Date(iv.date_interview).toLocaleDateString(lang==='fr'?'fr-FR':'en-GB',{day:'numeric',month:'long',year:'numeric'})}</Text>}
+                    <View style={{ flexDirection:'row', gap:8, marginTop:6 }}>
+                      {iv.youtube_interview && <Text style={{ fontSize:11, color:'#DC2626' }}>▶️ YouTube</Text>}
+                      {iv.audio_interview && <Text style={{ fontSize:11, color:'#7C3AED' }}>🎵 Audio</Text>}
+                    </View>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
         </ScrollView>
       )}
     </SafeAreaView>
@@ -124,6 +160,9 @@ const s = StyleSheet.create({
   cardTitle:  { fontSize:14, fontWeight:'700', color:COLORS.black, lineHeight:20, marginBottom:4 },
   cardExcerpt:{ fontSize:12, color:COLORS.gray600, lineHeight:17, marginBottom:3 },
   cardDate:   { fontSize:11, color:COLORS.gray400 },
+  cardMeta:   { fontSize:12, color:COLORS.gray600, marginBottom:2 },
+  badge:      { borderRadius:99, paddingHorizontal:8, paddingVertical:3 },
+  badgeTxt:   { fontSize:10, fontWeight:'700' as 'bold' },
   empty:      { alignItems:'center', paddingVertical:48, gap:10 },
   emptyTxt:   { fontSize:14, color:COLORS.gray400 },
 })

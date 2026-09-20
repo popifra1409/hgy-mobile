@@ -72,6 +72,14 @@ export const specialitesService = {
 
 export default api
 
+// ── Interviews HGY ──
+export const interviewService = {
+  getAll: (lang='fr', limit=10) =>
+    api.get(`/hgy/v1/interviews?lang=${lang}&per_page=${limit}`, { baseURL: 'https://hopitalgeneraldeyaounde.cm/wpblog/wp-json' }),
+  getById: (id: number) =>
+    api.get(`/hgy/v1/interviews/${id}`, { baseURL: 'https://hopitalgeneraldeyaounde.cm/wpblog/wp-json' }),
+}
+
 // ── WordPress Publication ──
 const WP_API  = 'https://hopitalgeneraldeyaounde.cm/wpblog/wp-json/wp/v2'
 const WP_AUTH = 'Basic YWRtaW5IR1k6b2ZNd0w0SnV3Y2ljZXdDcFV4b2poQVNy' // adminHGY:ofMwL4JuwcicewCpUxojhASr
