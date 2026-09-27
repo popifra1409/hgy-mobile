@@ -43,9 +43,9 @@
       "apiUrl": "https://hopitalgeneraldeyaounde.cm/portail/public/api/v1",
       "wpUrl": "https://hopitalgeneraldeyaounde.cm/wpblog/wp-json/hgy/v1",
       "eas": {
-        "projectId": "83b08f54-1681-406c-bf62-9d29712e7c54"
+        "projectId": "f5339b6e-0a6f-4864-9315-7d873a7ee9d9"
       }
     },
-    "owner": "popifra1409"
+    "owner": "csishgy"
   }
 }
