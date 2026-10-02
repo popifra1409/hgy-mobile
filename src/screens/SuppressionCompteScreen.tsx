@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLang } from '../context/LangContext'
 import { useAuth } from '../context/AuthContext'
 import { COLORS, SHADOW } from '../constants/theme'
-import { API_URL } from '../constants/config'
+const API_URL = 'https://hopitalgeneraldeyaounde.cm/portail/public/api/v1'
 
 const TYPES = [
   { value: 'patient',       fr: 'Patient',                    en: 'Patient' },
@@ -18,13 +18,13 @@ const TYPES = [
 
 export default function SuppressionCompteScreen({ navigation }: any) {
   const { lang } = useLang()
-  const { user, logout } = useAuth()
+  const { patient, logout } = useAuth()
 
   const [form, setForm] = useState({
-    nom:         user?.nom || '',
-    prenom:      user?.prenom || '',
-    email:       user?.email || '',
-    telephone:   user?.telephone || '',
+    nom:         patient?.nom || '',
+    prenom:      patient?.prenom || '',
+    email:       patient?.email || '',
+    telephone:   patient?.telephone || '',
     type_compte: 'patient',
     raison:      '',
   })
@@ -45,7 +45,7 @@ export default function SuppressionCompteScreen({ navigation }: any) {
 
     setLoading(true)
     try {
-      const r = await fetch(`${API_URL}/suppression-compte`, {
+      const r = await fetch('https://hopitalgeneraldeyaounde.cm/portail/public/api/suppression-compte', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(form),
