@@ -113,13 +113,33 @@ export default function SettingsScreen({ navigation }: any) {
         <SectionTitle title={lang === 'fr' ? '👤 Compte' : '👤 Account'} />
         <View style={s.card}>
           {isAuthenticated ? (
-            <TouchableOpacity style={s.dangerBtn} onPress={logout}>
-              <Text style={s.dangerBtnTxt}>🚪 {lang === 'fr' ? 'Se déconnecter' : 'Log out'}</Text>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity style={s.dangerBtn} onPress={logout}>
+                <Text style={s.dangerBtnTxt}>🚪 {lang === 'fr' ? 'Se déconnecter' : 'Log out'}</Text>
+              </TouchableOpacity>
+              <View style={{ height: 8 }} />
+              <TouchableOpacity
+                style={[s.dangerBtn, { borderColor: '#DC2626', backgroundColor: '#FFF5F5' }]}
+                onPress={() => navigation.navigate('SuppressionCompte')}>
+                <Text style={[s.dangerBtnTxt, { color: '#DC2626' }]}>
+                  🗑️ {lang === 'fr' ? 'Supprimer mon compte' : 'Delete my account'}
+                </Text>
+              </TouchableOpacity>
+            </>
           ) : (
-            <TouchableOpacity style={s.primaryBtn} onPress={() => navigation.navigate('Login')}>
-              <Text style={s.primaryBtnTxt}>🔐 {lang === 'fr' ? 'Se connecter' : 'Log in'}</Text>
-            </TouchableOpacity>
+            <>
+              <TouchableOpacity style={s.primaryBtn} onPress={() => navigation.navigate('Login')}>
+                <Text style={s.primaryBtnTxt}>🔐 {lang === 'fr' ? 'Se connecter' : 'Log in'}</Text>
+              </TouchableOpacity>
+              <View style={{ height: 8 }} />
+              <TouchableOpacity
+                style={[s.dangerBtn, { borderColor: '#DC2626', backgroundColor: '#FFF5F5' }]}
+                onPress={() => navigation.navigate('SuppressionCompte')}>
+                <Text style={[s.dangerBtnTxt, { color: '#DC2626' }]}>
+                  🗑️ {lang === 'fr' ? 'Supprimer mon compte' : 'Delete my account'}
+                </Text>
+              </TouchableOpacity>
+            </>
           )}
         </View>
 

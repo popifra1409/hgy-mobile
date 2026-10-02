@@ -4,11 +4,13 @@
   },
   "build": {
     "preview": {
-      "distribution": "internal",
-      "android": {
-        "buildType": "apk",
-        "image": "latest"
-      }
+      "distribution": "internal"
+    },
+    "production": {
+      "distribution": "store"
     }
+  },
+  "submit": {
+    "production": {}
   }
 }

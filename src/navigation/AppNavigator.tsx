@@ -25,6 +25,7 @@ import UrgencesScreen       from '../screens/UrgencesScreen'
 import SettingsScreen       from '../screens/SettingsScreen'
 import BlogScreen           from '../screens/BlogScreen'
 import ChangePasswordScreen from '../screens/ChangePasswordScreen'
+import SuppressionCompteScreen from '../screens/SuppressionCompteScreen'
 import HeuresVisiteScreen   from '../screens/HeuresVisiteScreen'
 import ChatbotScreen        from '../screens/ChatbotScreen'
 
@@ -60,6 +61,7 @@ function AccueilStackScreen() {
       <AccueilStack.Screen name="Blog"          component={BlogScreen} />
       <AccueilStack.Screen name="HeuresVisite"  component={HeuresVisiteScreen} />
       <AccueilStack.Screen name="Settings"      component={SettingsScreen} />
+      <AccueilStack.Screen name="SuppressionCompte" component={SuppressionCompteScreen} />
       <AccueilStack.Screen name="Notifications" component={NotificationsScreen} />
       <AccueilStack.Screen name="Chatbot"       component={ChatbotScreen} />
     </AccueilStack.Navigator>
@@ -87,6 +89,7 @@ function EspaceStackScreen() {
       <EspaceStack.Screen name="Resultat"       component={ResultatScreen} />
       <EspaceStack.Screen name="Notifications"  component={NotificationsScreen} />
       <EspaceStack.Screen name="Settings"       component={SettingsScreen} />
+      <EspaceStack.Screen name="SuppressionCompte" component={SuppressionCompteScreen} />
       <EspaceStack.Screen name="ChangePassword" component={ChangePasswordScreen} />
     </EspaceStack.Navigator>
   )
